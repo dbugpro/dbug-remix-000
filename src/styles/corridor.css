@@ -1,0 +1,263 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --corridor-bg: #09090b;
+  --wall-color: #18181b;
+  --accent-color: #22c55e;
+  --door-bg: #27272a;
+}
+
+body {
+  background-color: var(--corridor-bg);
+  color: white;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.corridor-container {
+  width: 100vw;
+  height: 100vh;
+  perspective: 1200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #18181b 0%, #09090b 100%);
+}
+
+.corridor {
+  width: 600px;
+  height: 400px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+}
+
+.wall {
+  position: absolute;
+  background-color: var(--wall-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 20px;
+  background-image: 
+    linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.wall-left {
+  left: 0;
+  top: 0;
+  width: 800px; /* Long corridor */
+  height: 400px;
+  transform: rotateY(90deg) translateZ(-300px) translateX(-400px);
+  background: linear-gradient(to right, #09090b, #18181b), 
+              linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.wall-right {
+  right: 0;
+  top: 0;
+  width: 800px;
+  height: 400px;
+  transform: rotateY(-90deg) translateZ(-300px) translateX(400px);
+  background: linear-gradient(to left, #09090b, #18181b),
+              linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.wall-far {
+  left: 0;
+  top: 0;
+  width: 600px;
+  height: 400px;
+  transform: translateZ(-800px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0c0c0e;
+  border: 4px double rgba(34, 197, 94, 0.2);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.wall-near {
+  left: 0;
+  top: 0;
+  width: 600px;
+  height: 400px;
+  transform: translateZ(0px); /* Just behind the camera essentially */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* See through it if we rotate */
+  opacity: 0.1;
+}
+
+/* Responsive Scaling */
+@media (max-width: 768px) {
+  .corridor-container {
+    perspective: 800px;
+  }
+  .corridor {
+    width: 400px;
+    height: 300px;
+  }
+  .wall-left, .wall-right {
+    height: 300px;
+    width: 600px;
+    transform: rotateY(90deg) translateZ(-200px) translateX(-300px);
+  }
+  .wall-right {
+    transform: rotateY(-90deg) translateZ(-200px) translateX(300px);
+  }
+  .wall-far, .wall-near {
+    width: 400px;
+    height: 300px;
+    transform: translateZ(-600px);
+  }
+  .door {
+    width: 45px;
+    height: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .corridor-container {
+    perspective: 600px;
+  }
+  .corridor {
+    width: 300px;
+    height: 250px;
+  }
+  .wall-left, .wall-right {
+    height: 250px;
+    width: 500px;
+    transform: rotateY(90deg) translateZ(-150px) translateX(-250px);
+  }
+  .wall-right {
+    transform: rotateY(-90deg) translateZ(-150px) translateX(250px);
+  }
+  .wall-far, .wall-near {
+    width: 300px;
+    height: 250px;
+    transform: translateZ(-500px);
+  }
+  .door {
+    width: 35px;
+    height: 55px;
+  }
+  .screen {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+}
+
+.door-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.door {
+  width: 60px;
+  height: 90px;
+  background: var(--door-bg);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.door:hover:not(.door-locked) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+  transform: scale(1.1);
+  background: #2d2d30;
+}
+
+.door-locked {
+  cursor: not-allowed;
+  opacity: 0.5;
+  border-color: #ef4444 !important;
+  box-shadow: none !important;
+}
+
+.door-locked:hover {
+  transform: none !important;
+}
+
+.door-unlocked {
+  border-color: var(--accent-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.4);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 8px;
+  background: #000;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.1);
+}
+
+.screen:hover {
+  background: #09090b;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+}
+
+.debug-overlay {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}

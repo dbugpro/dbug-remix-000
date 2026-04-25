@@ -1,67 +1,30 @@
-# dbug — BUGWORLD 2026
+# MAGICUBE Corridor Interface — BUGWORLD
 
-> Public Template Repository for BUGWORLD 2026 Session Development  
-> **Spec:** `v260303.1` | **Sync Root:** `C:\dbug` | **Session:** `DBUG 260303 (1)`
+A browser-based navigational interface for the BUGWORLD lattice schema. This system simulates sequential traversal through MAGICUBE instances.
 
-## 🔐 Core Rules
-- `dbug.` and `admin.` **must** include trailing periods (non-negotiable)
-- `zero_china_dependencies` is mandatory for global distribution
-- Admin Triad (`adminx`, `admin.`, `adminq`) required for `session_init`
+## Progression Logic
 
-## 🗂️ Structure
-UPDATING DBUG PROJECT ON AI GOOGLE STUDIO
+The corridor is programmable and follows a strict sequential progression:
 
-https://ai.studio/apps/e712dc26-20a3-4ad6-97c4-bf53afb81451
+- **Initialization**: The system starts at instance `000`.
+- **Traversal**: Entering any side matrix cell (Doors 0-9) increments the instance counter.
+- **Access Protocol**: The Far Door (Progression Matrix) remains electronically locked while the instance count is less than `3`.
+- **System Sync**: Once the counter reaches `003`, the Far Door unlocks, permitting passage to the next MAGICUBE instance in the lattice.
+- **Telemetry**: State is synchronized with the URL (`?cell=XXX`) and can be monitored via debug telemetry (`?debug=true`).
 
-dbug/
-├── .beta/
-│   ├── .g/
-│   │   ├── .gitkeep
-│   │   └── singularity_manifest.json
-│   └── .x/
-│       ├── .gitkeep
-│       └── singularity_manifest.json
-├── services
-│       └── geminiService.ts
-├── .gitignore
-├── .github
-├── core/
-├── LICENSE
-├── README.md
-└── metadata.json
+## Navigation
 
-UPDATING DBUG PROJECT ON BUGBASE-PC2
+- **Left Wall**: Even-numbered cells (0, 2, 4, 6, 8).
+- **Right Wall**: Odd-numbered cells (1, 3, 5, 7, 9).
+- **Far End**: Progression / Next Instance bypass.
+- **Near End**: Exit / Return to previous state.
 
-C:\dbug
-├── core/ # Identity layer (v260303.1)
-├── bugworld2026/ # Unity 6.3 LTS (bugapp000-999) + UE5.7 (-/q/)
-├── bugbase2026/ # BugBase 2026 modules
-├── 0/ - 9/ # DBUG PRODUCTIONS projects
-├── tools/ # MCP, TGA, utilities
-├── docs/ # Documentation
-├── sessions/ # Local-only session data (EXCLUDED from sync)
-├── .github/ # Template config + workflows
-├── .gitignore # Unity/UE5 exclusions
-├── .gitattributes # LFS configuration
-├── LICENSE
-├── README.md # This file
-└── metadata.json
+## Technical Stack
 
-## 🚀 Quick Start
-1. Click **"Use this template"** → **"Create a new repository"**
-2. Clone your new repo: `git clone https://github.com/YOU/NEW-REPO.git`
-3. Install Git LFS: `git lfs install`
-4. Configure local paths in `core/session_protocol.json`
-5. Initialize session with admin triad
+- **Framework**: React 18 + Vite + TypeScript
+- **State Management**: Zustand
+- **Styling**: Tailwind CSS + Custom 3D CSS Transforms
+- **Icons**: Lucide React
 
-## 🎮 Engine Support
-- **Unity:** 6.3 LTS (6000.3.10f1) — Primary
-- **Unreal Engine:** 5.7 — Secondary
-
-## 🔄 Sync Configuration
-- **Local Root:** `C:\dbug`
-- **Remote:** `https://github.com/dbugpro/dbug`
-- **Branches:** `main` (template), `session/<SESSION_ID>` (isolated work)
-
-## 📜 License
-DBUG LICENSE. See `LICENSE` for details.
+---
+*System reset successful. Ready for navigation.*
