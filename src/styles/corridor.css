@@ -26,6 +26,16 @@ body {
   justify-content: center;
   align-items: center;
   background: radial-gradient(circle at center, #18181b 0%, #09090b 100%);
+  touch-action: none;
+  user-select: none;
+}
+
+.corridor-container.draggable {
+  cursor: grab;
+}
+
+.corridor-container.dragging {
+  cursor: grabbing;
 }
 
 .corridor {
@@ -33,16 +43,43 @@ body {
   height: 400px;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s ease-out;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+}
+
+.door-focused {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.8) !important;
+  transform: scale(1.15) !important;
+  z-index: 50;
+  background: #2d2d30 !important;
+}
+
+.corridor-focused .door-frame:not(.focused-frame) {
+  filter: blur(4px);
+  opacity: 0.3;
+  transition: all 0.5s ease;
+}
+
+.prompt-overlay {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--accent-color);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  animation: pulse 1s infinite;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .wall {
   position: absolute;
   background-color: var(--wall-color);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
   padding: 20px;
   background-image: 
     linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
@@ -53,37 +90,25 @@ body {
 .wall-left {
   left: 0;
   top: 0;
-  width: 1500px; /* Long corridor */
+  width: 800px; /* Spans 0 to -800 */
   height: 400px;
-  transform: rotateY(90deg) translateZ(-300px) translateX(-750px);
+  transform: rotateY(90deg) translateZ(-300px) translateX(-400px);
   background: linear-gradient(to right, #09090b, #18181b), 
               linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
               linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start; /* Place from front to back */
-  align-items: center;
-  padding: 0 100px;
-  gap: 150px;
 }
 
 .wall-right {
   right: 0;
   top: 0;
-  width: 1500px;
+  width: 800px;
   height: 400px;
-  transform: rotateY(-90deg) translateZ(-300px) translateX(750px);
+  transform: rotateY(-90deg) translateZ(-300px) translateX(400px);
   background: linear-gradient(to left, #09090b, #18181b),
               linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
               linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0 100px;
-  gap: 150px;
 }
 
 .wall-far {
@@ -91,7 +116,7 @@ body {
   top: 0;
   width: 600px;
   height: 400px;
-  transform: translateZ(-1500px); /* Match side wall length */
+  transform: translateZ(calc(5 * var(--door-spacing) * -1));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -105,11 +130,11 @@ body {
   top: 0;
   width: 600px;
   height: 400px;
-  transform: translateZ(0px); /* Just behind the camera essentially */
+  transform: translateZ(0px);
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none; /* See through it if we rotate */
+  pointer-events: none;
   opacity: 0.1;
 }
 
@@ -117,6 +142,7 @@ body {
 @media (orientation: landscape) {
   .corridor-container {
     perspective: 1000px;
+    --door-spacing: 25vh;
   }
   .corridor {
     width: 60vw;
@@ -125,21 +151,19 @@ body {
   }
   .wall-left, .wall-right {
     height: 100%;
-    width: 300vh; /* Scalable length */
+    width: 150vh;
     transform-origin: center;
-    gap: 30vh;
-    padding: 0 20vh;
   }
   .wall-left {
-    transform: rotateY(90deg) translateZ(-30vw) translateX(-150vh);
+    transform: rotateY(90deg) translateZ(-30vw) translateX(-75vh);
   }
   .wall-right {
-    transform: rotateY(-90deg) translateZ(-30vw) translateX(150vh);
+    transform: rotateY(-90deg) translateZ(-30vw) translateX(75vh);
   }
   .wall-far, .wall-near {
     width: 60vw;
     height: 100%;
-    transform: translateZ(-300vh);
+    transform: translateZ(calc(5 * var(--door-spacing) * -1));
   }
   .wall-near {
     transform: translateZ(0);
@@ -153,10 +177,13 @@ body {
 @media (max-height: 500px) and (orientation: landscape) {
   .corridor-container {
     perspective: 600px;
+    --door-spacing: 20vh;
   }
-  .door-frame {
-    gap: 4px;
-    transform: scale(0.8);
+  .left-side {
+    transform: translateX(-30vw) translateZ(calc(var(--door-index) * var(--door-spacing) * -1)) rotateY(90deg) scale(0.7);
+  }
+  .right-side {
+    transform: translateX(30vw) translateZ(calc(var(--door-index) * var(--door-spacing) * -1)) rotateY(-90deg) scale(0.7);
   }
   .screen {
     font-size: 7px;
@@ -183,7 +210,7 @@ body {
   .wall-far, .wall-near {
     width: 400px;
     height: 300px;
-    transform: translateZ(-600px);
+    transform: translateZ(-500px);
   }
   .door {
     width: 45px;
@@ -210,7 +237,7 @@ body {
   .wall-far, .wall-near {
     width: 300px;
     height: 250px;
-    transform: translateZ(-500px);
+    transform: translateZ(-400px);
   }
   .door {
     width: 35px;
@@ -223,10 +250,56 @@ body {
 }
 
 .door-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -60px; /* Center alignment basis */
+  margin-left: -30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  transform-style: preserve-3d;
+}
+
+.left-side {
+  transform: translateX(-300px) translate3d(0, 0, calc(var(--door-index) * var(--door-spacing) * -1)) rotateY(90deg);
+}
+
+.right-side {
+  transform: translateX(300px) translate3d(0, 0, calc(var(--door-index) * var(--door-spacing) * -1)) rotateY(-90deg);
+}
+
+.far-frame, .near-frame {
+  position: relative;
+  top: auto;
+  left: auto;
+  margin: 0;
+}
+
+@media (orientation: landscape) {
+  .left-side {
+    transform: translateX(-30vw) translateZ(var(--z-offset)) rotateY(90deg);
+  }
+  .right-side {
+    transform: translateX(30vw) translateZ(var(--z-offset)) rotateY(-90deg);
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .corridor-container {
+    perspective: 600px;
+  }
+  .left-side {
+    transform: translateX(-30vw) translateZ(var(--z-offset)) rotateY(90deg) scale(0.7);
+  }
+  .right-side {
+    transform: translateX(30vw) translateZ(var(--z-offset)) rotateY(-90deg) scale(0.7);
+  }
+  .screen {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
 }
 
 .door {

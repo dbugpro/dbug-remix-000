@@ -7,6 +7,7 @@ interface DoorProps {
   onClick: () => void;
   isLocked?: boolean;
   isUnlocked?: boolean;
+  isFocused?: boolean;
 }
 
 export const Door: React.FC<DoorProps> = ({
@@ -14,13 +15,15 @@ export const Door: React.FC<DoorProps> = ({
   position,
   onClick,
   isLocked = false,
-  isUnlocked = false
+  isUnlocked = false,
+  isFocused = false
 }) => {
   const doorClasses = [
     'door',
     `door-${position}`,
     isLocked ? 'door-locked' : '',
-    isUnlocked ? 'door-unlocked' : ''
+    isUnlocked ? 'door-unlocked' : '',
+    isFocused ? 'door-focused' : ''
   ].filter(Boolean).join(' ');
 
   return (
