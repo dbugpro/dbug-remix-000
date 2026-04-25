@@ -4,7 +4,7 @@ import { Lock, Unlock } from 'lucide-react';
 interface DoorProps {
   number: number;
   position: 'left' | 'right' | 'near' | 'far';
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   isLocked?: boolean;
   isUnlocked?: boolean;
   isFocused?: boolean;

@@ -19,10 +19,46 @@ export const Corridor: React.FC = () => {
   } = useCorridorStore();
   
   const [zoom, setZoom] = useState(0);
+  const [panX, setPanX] = useState(0);
   const [lastDistance, setLastDistance] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [mouseStartX, setMouseStartX] = useState(0);
+  const [mouseStartY, setMouseStartY] = useState(0);
 
   const handleWheel = (e: React.WheelEvent) => {
     setZoom(prev => Math.min(Math.max(prev - e.deltaY, 0), 1800));
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setStartX(e.clientX - panX);
+    setMouseStartX(e.clientX);
+    setMouseStartY(e.clientY);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const newX = e.clientX - startX;
+    setPanX(Math.min(Math.max(newX, -1000), 1000));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setStartX(e.touches[0].pageX - panX);
+      setMouseStartX(e.touches[0].pageX);
+      setMouseStartY(e.touches[0].pageY);
+    } else if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      setLastDistance(distance);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -37,6 +73,9 @@ export const Corridor: React.FC = () => {
         setZoom(prev => Math.min(Math.max(prev + delta, 0), 1800));
       }
       setLastDistance(distance);
+    } else if (e.touches.length === 1) {
+      const newX = e.touches[0].pageX - startX;
+      setPanX(Math.min(Math.max(newX, -1000), 1000));
     }
   };
 
@@ -49,7 +88,7 @@ export const Corridor: React.FC = () => {
   // Side door configuration
   const leftDoors = [0, 2, 4, 6, 8];
   const rightDoors = [1, 3, 5, 7, 9];
-  const doorSpacing = 300;
+  const doorSpacing = 350;
 
   // Sync state to URL
   useEffect(() => {
@@ -59,15 +98,22 @@ export const Corridor: React.FC = () => {
     setSearchParams(params);
   }, [currentCell, setSearchParams, showDebug, focusedDoor]);
 
-  const handleDoorClick = (num: number, position: 'left' | 'right' | 'far' | 'near') => {
+  const handleDoorClick = (num: number, position: 'left' | 'right' | 'far', event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    // Disambiguate click from drag
+    const dx = Math.abs(event.clientX - mouseStartX);
+    const dy = Math.abs(event.clientY - mouseStartY);
+    if (dx > 10 || dy > 10) return;
+
     if (focusedDoor === num) {
       // Second click: Open
       if (position === 'far') {
         if (isFarDoorUnlocked) {
           setDoorState('opened');
           setTimeout(() => {
-            window.location.href = '/123'; // Navigate to BUGWORLD
-          }, 600);
+            window.location.href = '/123';
+          }, 800);
         }
         return;
       }
@@ -77,15 +123,25 @@ export const Corridor: React.FC = () => {
         incrementInstance();
         setFocus(null);
         setDoorState('corridor');
-      }, 600);
+        setZoom(0);
+        setPanX(0);
+      }, 1000);
     } else {
       // First click: Focus
       setFocus(num);
       setDoorState('focused');
-      // Adjust zoom to face the door? The user said "adjusted the view so that the door is right in front of me"
-      // We can use a transition on the corridor container if we had rotation, but since we are just zooming,
-      // maybe we just set a specific zoom or transform.
-      // However, the original layout was linear.
+      
+      // Adjust view so the door is front-center
+      if (position === 'left') {
+        setPanX(400);
+        setZoom(800);
+      } else if (position === 'right') {
+        setPanX(-400);
+        setZoom(800);
+      } else if (position === 'far') {
+        setPanX(0);
+        setZoom(1200);
+      }
     }
   };
 
@@ -96,12 +152,47 @@ export const Corridor: React.FC = () => {
     }
   };
 
+  const renderDoor = (num: number, position: 'left' | 'right' | 'far', index: number = 0) => {
+    const isFocused = focusedDoor === num;
+    const isOpened = isFocused && doorState === 'opened';
+    const isLocked = position === 'far' ? !isFarDoorUnlocked : false;
+    const isUnlocked = position === 'far' ? isFarDoorUnlocked : false;
+
+    const frameStyle = position !== 'far' ? { 
+      transform: `${position === 'left' ? 'translateX(calc(-1 * var(--side-offset, 300px)))' : 'translateX(var(--side-offset, 300px))'} translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(${position === 'left' ? '90deg' : '-90deg'})` 
+    } : {};
+
+    return (
+      <div 
+        key={num} 
+        className={`door-frame ${position}-side`}
+        style={frameStyle}
+      >
+        <div className="relative">
+          {isFocused && doorState === 'focused' && (
+            <div className="prompt-overlay">{position === 'far' ? 'CLICK TO SYNC LATTICE' : 'CLICK TO ENTER'}</div>
+          )}
+          <div className="door-label">
+            {position === 'far' ? (isFarDoorUnlocked ? 'LATTICE PORTAL' : 'CORE LOCKED') : `SECTOR ${num}`}
+          </div>
+          <Door 
+            number={num} 
+            position={position} 
+            onClick={(e) => handleDoorClick(num, position, e)} 
+            isFocused={isFocused}
+            isOpened={isOpened}
+            isLocked={isLocked}
+            isUnlocked={isUnlocked}
+          />
+        </div>
+      </div>
+    );
+  };
+
   // Calculate container transform based on focus
-  let corridorTransform = `translateZ(${zoom}px)`;
+  let corridorTransform = `translateZ(${zoom}px) translateX(${panX}px)`;
   if (focusedDoor !== null && doorState !== 'corridor') {
-    // If focused, we might want to override or additive transform
-    // For now, let's keep it simple or use the store to drive more complex camera if needed.
-    // The user just wants the focus logic back.
+    // Optional focus positioning
   }
 
   return (
@@ -109,6 +200,11 @@ export const Corridor: React.FC = () => {
       className="corridor-container" 
       id="corridor-root"
       onWheel={handleWheel}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onClick={handleBackdropClick}
@@ -141,75 +237,13 @@ export const Corridor: React.FC = () => {
                   {isFarDoorUnlocked ? 'LATTICE SYNC READY' : 'LEVEL PROGRESSION REQUIRED'}
                 </div>
              </div>
-             <div className="relative">
-               {focusedDoor === 100 && doorState === 'focused' && (
-                 <div className="prompt-overlay">CLICK TO ENTER LATTICE</div>
-               )}
-               <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[10px] font-bold font-mono text-zinc-500 bg-white/90 px-3 py-1 rounded shadow-sm border border-zinc-200 whitespace-nowrap">
-                 SYNC PORTAL
-               </div>
-               <Door 
-                 number={0} 
-                 position="far" 
-                 onClick={() => handleDoorClick(100, 'far')} 
-                 isLocked={!isFarDoorUnlocked} 
-                 isUnlocked={isFarDoorUnlocked}
-                 isFocused={focusedDoor === 100}
-                 isOpened={focusedDoor === 100 && doorState === 'opened'}
-               />
-             </div>
+             {renderDoor(100, 'far')}
           </div>
         </div>
 
-        {/* Left Wall Doors (Even) */}
-        {leftDoors.map((num, index) => (
-          <div 
-            key={num} 
-            className="door-frame left-side"
-            style={{ transform: `translateX(calc(-1 * var(--side-offset, 300px))) translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(90deg)` }}
-          >
-            <div className="relative">
-              {focusedDoor === num && doorState === 'focused' && (
-                <div className="prompt-overlay">ENTER SECTOR</div>
-              )}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold font-mono text-zinc-500 bg-white/90 px-2 py-0.5 rounded shadow-sm border border-zinc-200">
-                SECTOR {num}
-              </div>
-              <Door 
-                number={num} 
-                position="left" 
-                onClick={() => handleDoorClick(num, 'left')} 
-                isFocused={focusedDoor === num}
-                isOpened={focusedDoor === num && doorState === 'opened'}
-              />
-            </div>
-          </div>
-        ))}
-
-        {/* Right Wall Doors (Odd) */}
-        {rightDoors.map((num, index) => (
-          <div 
-            key={num} 
-            className="door-frame right-side"
-            style={{ transform: `translateX(var(--side-offset, 300px)) translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(-90deg)` }}
-          >
-            <div className="relative">
-              {focusedDoor === num && doorState === 'focused' && (
-                <div className="prompt-overlay">ENTER SECTOR</div>
-              )}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold font-mono text-zinc-500 bg-white/90 px-2 py-0.5 rounded shadow-sm border border-zinc-200">
-                SECTOR {num}
-              </div>
-              <Door 
-                number={num} 
-                position="right" 
-                onClick={() => handleDoorClick(num, 'right')} 
-                isFocused={focusedDoor === num}
-                isOpened={focusedDoor === num && doorState === 'opened'}
-              />
-            </div>
-          </div>
-        ))}
+        {/* Side Doors */}
+        {leftDoors.map((num, index) => renderDoor(num, 'left', index))}
+        {rightDoors.map((num, index) => renderDoor(num, 'right', index))}
 
         {/* Near Wall */}
         <div className="wall wall-near" />
