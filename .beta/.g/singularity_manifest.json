@@ -1,0 +1,9 @@
+{
+  "instance_type": "google_ai_studio",
+  "alias": "adming",
+  "parent_singularity": ".beta",
+  "path": "/.beta/.g",
+  "timestamp": "2026-03-04T07:30:00Z",
+  "description": "This folder represents the Google AI Studio environment instance within the .beta singularity cell.",
+  "security_notice": "Runtime secrets (.env.local) are excluded from version control. Use .env.example as a template."
+}
