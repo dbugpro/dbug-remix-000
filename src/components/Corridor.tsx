@@ -3,99 +3,47 @@ import { useSearchParams } from 'react-router-dom';
 import { Door } from './Door';
 import { Screen } from './Screen';
 import { useCorridorStore } from '../store/useCorridorStore';
-import { useDragPan } from '../hooks/useDragPan';
 import '../styles/corridor.css';
 
 export const Corridor: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { 
-    instanceCount, 
-    currentCell, 
-    isFarDoorUnlocked, 
-    incrementInstance,
-    focusedDoor,
-    setFocus,
-    doorState,
-    setDoorState
-  } = useCorridorStore();
-
-  const { rotation, setRotation, isDragging, handleStart } = useDragPan(45);
+  const { instanceCount, currentCell, isFarDoorUnlocked, incrementInstance } = useCorridorStore();
 
   const showDebug = searchParams.get('debug') === 'true';
 
-  // Side door sequence along depth
+  // Side door configuration
   const leftDoors = [0, 2, 4, 6, 8];
   const rightDoors = [1, 3, 5, 7, 9];
-
-  // Progression logic: 000 -> 003
-  const doorSpacing = 150; // Spacing along Z axis
+  const doorSpacing = 150; // Requested depth spacing
 
   // Sync state to URL
   useEffect(() => {
     const params: Record<string, string> = { cell: currentCell };
     if (showDebug) params.debug = 'true';
-    if (focusedDoor !== null) params.focus = String(focusedDoor);
     setSearchParams(params);
-  }, [currentCell, setSearchParams, showDebug, focusedDoor]);
+  }, [currentCell, setSearchParams, showDebug]);
 
-  const handleDoorClick = (num: number, position: 'left' | 'right' | 'far' | 'near') => {
-    if (isDragging) return;
-
-    if (focusedDoor === num) {
-      if (position === 'far') {
-        if (isFarDoorUnlocked) {
-          setDoorState('opened');
-          setTimeout(() => {
-            incrementInstance();
-            setFocus(null);
-            setDoorState('corridor');
-            setRotation(0);
-          }, 500);
-        }
-        return;
-      }
-      
-      if (position === 'near') {
-        console.log('Exit corridor');
-        return;
-      }
-
-      // Side doors
-      setDoorState('opened');
-      setTimeout(() => {
+  const handleDoorClick = (num: number, position: string) => {
+    if (position === 'far') {
+      if (isFarDoorUnlocked) {
+        console.log('Proceeding to next MAGICUBE instance');
         incrementInstance();
-        setFocus(null);
-        setDoorState('corridor');
-        setRotation(0);
-      }, 500);
-    } else {
-      setFocus(num);
-      setDoorState('focused');
-      // Set rotation to face door
-      if (position === 'left') setRotation(45);
-      if (position === 'right') setRotation(-45);
-      if (position === 'far') setRotation(0);
-      if (position === 'near') setRotation(180); // Optional: if we want to turn around
+      } else {
+        console.log('Far door is LOCKED. Reach Instance 003.');
+      }
+      return;
     }
+    
+    console.log(`Entering Cell ${num} - Incrementing Instance`);
+    incrementInstance();
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setFocus(null);
-      setDoorState('corridor');
-      setRotation(0);
-    }
+  const handleNearDoorClick = () => {
+    console.log('Exiting current sector');
   };
 
   return (
-    <div 
-      className={`corridor-container ${isDragging ? 'dragging' : 'draggable'}`} 
-      id="corridor-root"
-      onMouseDown={(e) => handleStart(e.clientX)}
-      onTouchStart={(e) => handleStart(e.touches[0].clientX)}
-      onClick={handleBackdropClick}
-      style={{ '--door-spacing': `${doorSpacing}px` } as React.CSSProperties}
-    >
+    <div className="corridor-container" id="corridor-root">
       {/* Debug Overlay */}
       {showDebug && (
         <div className="debug-overlay">
@@ -105,46 +53,39 @@ export const Corridor: React.FC = () => {
         </div>
       )}
 
-      <div 
-        className={`corridor ${focusedDoor !== null ? 'corridor-focused' : ''}`}
-        style={{ transform: `rotateY(${rotation}deg)` }}
-      >
+      <div className="corridor">
         {/* Walls */}
         <div className="wall wall-left" />
         <div className="wall wall-right" />
+        
+        {/* Far Wall */}
         <div className="wall wall-far">
-          <div className={`door-frame far-frame ${focusedDoor === 0 && doorState !== 'corridor' ? 'focused-frame' : ''}`}>
+          <div className="door-frame far-frame">
              <div className="mb-4 text-center">
-                <div className="text-xs text-zinc-500 uppercase tracking-widest">Instance</div>
-                <div className={`text-3xl font-mono ${isFarDoorUnlocked ? 'text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : 'text-red-500'}`}>
+                <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">Instance</div>
+                <div className={`text-3xl font-mono ${isFarDoorUnlocked ? 'text-green-500' : 'text-red-500'}`}>
                   {String(instanceCount).padStart(3, '0')}
                 </div>
-                <div className="mt-1 text-[10px] text-zinc-600 uppercase">
+                <div className="mt-1 text-[10px] text-zinc-600 uppercase font-mono">
                   {isFarDoorUnlocked ? 'UNLOCKED' : 'LOCKED'}
                 </div>
              </div>
-             <div className="relative">
-               {focusedDoor === 0 && doorState === 'focused' && (
-                 <div className="prompt-overlay">CLICK TO ENTER</div>
-               )}
-               <Door 
-                 number={0} 
-                 position="far" 
-                 onClick={() => handleDoorClick(0, 'far')} 
-                 isLocked={!isFarDoorUnlocked} 
-                 isUnlocked={isFarDoorUnlocked}
-                 isFocused={focusedDoor === 0}
-               />
-             </div>
+             <Door 
+               number={0} 
+               position="far" 
+               onClick={() => handleDoorClick(0, 'far')} 
+               isLocked={!isFarDoorUnlocked} 
+               isUnlocked={isFarDoorUnlocked}
+             />
           </div>
         </div>
 
-        {/* Left Wall Doors */}
+        {/* Left Wall Doors (Even) */}
         {leftDoors.map((num, index) => (
           <div 
             key={num} 
-            className={`door-frame side-door-frame left-side ${focusedDoor === num ? 'focused-frame' : ''}`}
-            style={{ '--door-index': index } as React.CSSProperties}
+            className="door-frame left-side"
+            style={{ transform: `translateX(-300px) translate3d(0, 0, ${-index * doorSpacing}px) rotateY(90deg)` }}
           >
             <Screen 
               position="left" 
@@ -153,26 +94,20 @@ export const Corridor: React.FC = () => {
               interactive 
               onClick={() => handleDoorClick(num, 'left')} 
             />
-            <div className="relative">
-              {focusedDoor === num && doorState === 'focused' && (
-                <div className="prompt-overlay">CLICK TO ENTER</div>
-              )}
-              <Door 
-                number={num} 
-                position="left" 
-                onClick={() => handleDoorClick(num, 'left')} 
-                isFocused={focusedDoor === num}
-              />
-            </div>
+            <Door 
+              number={num} 
+              position="left" 
+              onClick={() => handleDoorClick(num, 'left')} 
+            />
           </div>
         ))}
 
-        {/* Right Wall Doors */}
+        {/* Right Wall Doors (Odd) */}
         {rightDoors.map((num, index) => (
           <div 
             key={num} 
-            className={`door-frame side-door-frame right-side ${focusedDoor === num ? 'focused-frame' : ''}`}
-            style={{ '--door-index': index } as React.CSSProperties}
+            className="door-frame right-side"
+            style={{ transform: `translateX(300px) translate3d(0, 0, ${-index * doorSpacing}px) rotateY(-90deg)` }}
           >
             <Screen 
               position="left" 
@@ -181,27 +116,16 @@ export const Corridor: React.FC = () => {
               interactive 
               onClick={() => handleDoorClick(num, 'right')} 
             />
-            <div className="relative">
-              {focusedDoor === num && doorState === 'focused' && (
-                <div className="prompt-overlay">CLICK TO ENTER</div>
-              )}
-              <Door 
-                number={num} 
-                position="right" 
-                onClick={() => handleDoorClick(num, 'right')} 
-                isFocused={focusedDoor === num}
-              />
-            </div>
+            <Door 
+              number={num} 
+              position="right" 
+              onClick={() => handleDoorClick(num, 'right')} 
+            />
           </div>
         ))}
 
-        {/* Near Wall (behind us) */}
-        <div className="wall wall-near">
-          <div className={`door-frame near-frame ${focusedDoor === -1 ? 'focused-frame' : ''}`}>
-            <Screen position="above" content="EXIT" />
-            <Door number={0} position="near" onClick={() => handleDoorClick(-1, 'near')} isFocused={focusedDoor === -1} />
-          </div>
-        </div>
+        {/* Near Wall */}
+        <div className="wall wall-near" />
       </div>
     </div>
   );
