@@ -32,14 +32,14 @@ export const Door: React.FC<DoorProps> = ({
       onClick={!isLocked ? onClick : undefined}
       id={`door-${position}-${number}`}
     >
-      <div className="flex flex-col items-center gap-1">
-        <span className="text-xl font-bold font-mono">{number}</span>
-        {isLocked && <Lock className="w-3 h-3 text-red-500" />}
-        {isUnlocked && <Unlock className="w-3 h-3 text-green-500" />}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[8px] font-bold font-mono text-zinc-400 bg-white/80 px-1 rounded shadow-sm border border-zinc-100">{number}</div>
+      <div className="flex items-center justify-center w-full h-full">
+        {isLocked && <Lock className="w-5 h-5 text-red-500/20" />}
+        {isUnlocked && <Unlock className="w-5 h-5 text-blue-400" />}
       </div>
       
       {isUnlocked && (
-        <div className="absolute top-0 right-0 w-2 h-2 bg-green-500 rounded-full m-1 animate-ping" />
+        <div className="absolute bottom-2 right-2 w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
       )}
     </div>
   );

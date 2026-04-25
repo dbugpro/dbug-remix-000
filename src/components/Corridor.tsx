@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Door } from './Door';
 import { Screen } from './Screen';
@@ -8,13 +8,40 @@ import '../styles/corridor.css';
 export const Corridor: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { instanceCount, currentCell, isFarDoorUnlocked, incrementInstance } = useCorridorStore();
+  const [zoom, setZoom] = useState(0);
+  const [lastDistance, setLastDistance] = useState<number | null>(null);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    // Zoom in on deltaY < 0, out on deltaY > 0
+    setZoom(prev => Math.min(Math.max(prev - e.deltaY, 0), 1500));
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const distance = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+      
+      if (lastDistance !== null) {
+        // Multiplier to make it feel natural
+        const delta = (distance - lastDistance) * 3;
+        setZoom(prev => Math.min(Math.max(prev + delta, 0), 1500));
+      }
+      setLastDistance(distance);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setLastDistance(null);
+  };
 
   const showDebug = searchParams.get('debug') === 'true';
 
   // Side door configuration
   const leftDoors = [0, 2, 4, 6, 8];
   const rightDoors = [1, 3, 5, 7, 9];
-  const doorSpacing = 150; // Requested depth spacing
+  const doorSpacing = 300; // Increased spacing for long hallway feel
 
   // Sync state to URL
   useEffect(() => {
@@ -43,7 +70,13 @@ export const Corridor: React.FC = () => {
   };
 
   return (
-    <div className="corridor-container" id="corridor-root">
+    <div 
+      className="corridor-container" 
+      id="corridor-root"
+      onWheel={handleWheel}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Debug Overlay */}
       {showDebug && (
         <div className="debug-overlay">
@@ -53,10 +86,12 @@ export const Corridor: React.FC = () => {
         </div>
       )}
 
-      <div className="corridor">
+      <div className="corridor" style={{ transform: `translateZ(${zoom}px)` }}>
         {/* Walls */}
         <div className="wall wall-left" />
         <div className="wall wall-right" />
+        <div className="wall wall-ceiling" />
+        <div className="wall wall-floor" />
         
         {/* Far Wall */}
         <div className="wall wall-far">
@@ -85,7 +120,7 @@ export const Corridor: React.FC = () => {
           <div 
             key={num} 
             className="door-frame left-side"
-            style={{ transform: `translateX(-300px) translate3d(0, 0, ${-index * doorSpacing}px) rotateY(90deg)` }}
+            style={{ transform: `translateX(calc(-1 * var(--side-offset, 300px))) translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(90deg)` }}
           >
             <Screen 
               position="left" 
@@ -107,7 +142,7 @@ export const Corridor: React.FC = () => {
           <div 
             key={num} 
             className="door-frame right-side"
-            style={{ transform: `translateX(300px) translate3d(0, 0, ${-index * doorSpacing}px) rotateY(-90deg)` }}
+            style={{ transform: `translateX(var(--side-offset, 300px)) translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(-90deg)` }}
           >
             <Screen 
               position="left" 
