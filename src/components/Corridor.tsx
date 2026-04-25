@@ -128,10 +128,15 @@ export const Corridor: React.FC = () => {
   const handleDoorClick = (num: number, position: 'left' | 'right' | 'far' | 'near', event: React.MouseEvent) => {
     event.stopPropagation();
     
-    // Disambiguate click from drag
+    // increase displacement threshold for mobile/touch
     const dx = Math.abs(event.clientX - mouseStartX);
     const dy = Math.abs(event.clientY - mouseStartY);
-    if (dx > 10 || dy > 10) return;
+    if (dx > 40 || dy > 40) {
+      console.log('Click ignored due to move displacement:', dx, dy);
+      return;
+    }
+
+    console.log(`Door Clicked: num=${num}, pos=${position}, state=${doorState}, focused=${focusedDoor}`);
 
     if (focusedDoor === num) {
       // Second click: Open
@@ -185,6 +190,7 @@ export const Corridor: React.FC = () => {
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
+    console.log('Backdrop Clicked:', e.target === e.currentTarget ? 'CONTAINER' : 'ELEMENT', (e.target as HTMLElement).className);
     if (e.target === e.currentTarget) {
       setFocus(null);
       setDoorState('corridor');
@@ -209,22 +215,24 @@ export const Corridor: React.FC = () => {
         className={`door-frame ${position}-side`}
         style={frameStyle}
       >
-        <div className="relative">
+        <div className="relative pointer-events-none">
           {isFocused && doorState === 'focused' && (
             <div className="prompt-overlay">{position === 'far' ? 'CLICK TO SYNC LATTICE' : position === 'near' ? 'CLICK TO RETURN' : 'CLICK TO ENTER'}</div>
           )}
           <div className="door-label">
             {position === 'far' ? (isFarDoorUnlocked ? 'LATTICE PORTAL' : 'CORE LOCKED') : position === 'near' ? 'RETURN PORTAL' : `SECTOR ${num}`}
           </div>
-          <Door 
-            number={num === -1 ? 0 : num} 
-            position={position} 
-            onClick={(e) => handleDoorClick(num, position, e)} 
-            isFocused={isFocused}
-            isOpened={isOpened}
-            isLocked={isLocked}
-            isUnlocked={isUnlocked}
-          />
+          <div className="pointer-events-auto">
+            <Door 
+              number={num === -1 ? 0 : num} 
+              position={position} 
+              onClick={(e) => handleDoorClick(num, position, e)} 
+              isFocused={isFocused}
+              isOpened={isOpened}
+              isLocked={isLocked}
+              isUnlocked={isUnlocked}
+            />
+          </div>
         </div>
       </div>
     );
