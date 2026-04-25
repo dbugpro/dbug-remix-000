@@ -1,5 +1,6 @@
 {
-  "name": "MAGICUBE Corridor",
+  "name": "TARDIS",
   "description": "BUGWORLD lattice navigation interface for MAGICUBE cells.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
