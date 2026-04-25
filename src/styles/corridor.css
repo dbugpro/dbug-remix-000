@@ -53,25 +53,37 @@ body {
 .wall-left {
   left: 0;
   top: 0;
-  width: 800px; /* Long corridor */
+  width: 1500px; /* Long corridor */
   height: 400px;
-  transform: rotateY(90deg) translateZ(-300px) translateX(-400px);
+  transform: rotateY(90deg) translateZ(-300px) translateX(-750px);
   background: linear-gradient(to right, #09090b, #18181b), 
               linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
               linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start; /* Place from front to back */
+  align-items: center;
+  padding: 0 100px;
+  gap: 150px;
 }
 
 .wall-right {
   right: 0;
   top: 0;
-  width: 800px;
+  width: 1500px;
   height: 400px;
-  transform: rotateY(-90deg) translateZ(-300px) translateX(400px);
+  transform: rotateY(-90deg) translateZ(-300px) translateX(750px);
   background: linear-gradient(to left, #09090b, #18181b),
               linear-gradient(rgba(34, 197, 94, 0.05) 1px, transparent 1px),
               linear-gradient(90deg, rgba(34, 197, 94, 0.05) 1px, transparent 1px);
   background-size: 100% 100%, 40px 40px, 40px 40px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 100px;
+  gap: 150px;
 }
 
 .wall-far {
@@ -79,7 +91,7 @@ body {
   top: 0;
   width: 600px;
   height: 400px;
-  transform: translateZ(-800px);
+  transform: translateZ(-1500px); /* Match side wall length */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,8 +113,58 @@ body {
   opacity: 0.1;
 }
 
-/* Responsive Scaling */
-@media (max-width: 768px) {
+/* Responsive Scaling & Orientation Fixes */
+@media (orientation: landscape) {
+  .corridor-container {
+    perspective: 1000px;
+  }
+  .corridor {
+    width: 60vw;
+    height: 60vh;
+    max-height: 400px;
+  }
+  .wall-left, .wall-right {
+    height: 100%;
+    width: 300vh; /* Scalable length */
+    transform-origin: center;
+    gap: 30vh;
+    padding: 0 20vh;
+  }
+  .wall-left {
+    transform: rotateY(90deg) translateZ(-30vw) translateX(-150vh);
+  }
+  .wall-right {
+    transform: rotateY(-90deg) translateZ(-30vw) translateX(150vh);
+  }
+  .wall-far, .wall-near {
+    width: 60vw;
+    height: 100%;
+    transform: translateZ(-300vh);
+  }
+  .wall-near {
+    transform: translateZ(0);
+  }
+  .door {
+    width: clamp(40px, 8vw, 60px);
+    height: clamp(60px, 12vw, 90px);
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .corridor-container {
+    perspective: 600px;
+  }
+  .door-frame {
+    gap: 4px;
+    transform: scale(0.8);
+  }
+  .screen {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
   .corridor-container {
     perspective: 800px;
   }

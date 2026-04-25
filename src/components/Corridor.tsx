@@ -11,7 +11,7 @@ export const Corridor: React.FC = () => {
 
   const showDebug = searchParams.get('debug') === 'true';
 
-  // Side door logic
+  // Side door sequence along depth
   const leftDoors = [0, 2, 4, 6, 8];
   const rightDoors = [1, 3, 5, 7, 9];
 
