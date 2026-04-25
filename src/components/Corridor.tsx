@@ -12,6 +12,7 @@ export const Corridor: React.FC = () => {
     currentCell, 
     isFarDoorUnlocked, 
     incrementInstance,
+    decrementInstance,
     focusedDoor,
     setFocus,
     doorState,
@@ -20,11 +21,21 @@ export const Corridor: React.FC = () => {
   
   const [zoom, setZoom] = useState(0);
   const [panX, setPanX] = useState(0);
+  const [rotationY, setRotationY] = useState(0);
   const [lastDistance, setLastDistance] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
   const [mouseStartX, setMouseStartX] = useState(0);
   const [mouseStartY, setMouseStartY] = useState(0);
+
+  const handleReset = () => {
+    setZoom(0);
+    setPanX(0);
+    setRotationY(0);
+    setFocus(null);
+    setDoorState('corridor');
+  };
 
   const handleWheel = (e: React.WheelEvent) => {
     setZoom(prev => Math.min(Math.max(prev - e.deltaY, 0), 1800));
@@ -33,14 +44,26 @@ export const Corridor: React.FC = () => {
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setStartX(e.clientX - panX);
+    setStartY(e.clientY - zoom);
     setMouseStartX(e.clientX);
     setMouseStartY(e.clientY);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
+    
+    // Pan sideways
     const newX = e.clientX - startX;
     setPanX(Math.min(Math.max(newX, -1000), 1000));
+    
+    // Move forward/back with vertical drag
+    const newZoom = e.clientY - startY;
+    setZoom(Math.min(Math.max(newZoom, -100), 1800));
+
+    // Turn with X
+    setRotationY(newX * 0.2); 
+    // Pan limited
+    setPanX(Math.min(Math.max(newX * 0.5, -200), 200));
   };
 
   const handleMouseUp = () => {
@@ -50,6 +73,7 @@ export const Corridor: React.FC = () => {
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       setStartX(e.touches[0].pageX - panX);
+      setStartY(e.touches[0].pageY - zoom);
       setMouseStartX(e.touches[0].pageX);
       setMouseStartY(e.touches[0].pageY);
     } else if (e.touches.length === 2) {
@@ -75,7 +99,10 @@ export const Corridor: React.FC = () => {
       setLastDistance(distance);
     } else if (e.touches.length === 1) {
       const newX = e.touches[0].pageX - startX;
-      setPanX(Math.min(Math.max(newX, -1000), 1000));
+      const newZoom = e.touches[0].pageY - startY;
+      setZoom(Math.min(Math.max(newZoom, -100), 1800));
+      setRotationY(newX * 0.2);
+      setPanX(Math.min(Math.max(newX * 0.5, -200), 200));
     }
   };
 
@@ -98,7 +125,7 @@ export const Corridor: React.FC = () => {
     setSearchParams(params);
   }, [currentCell, setSearchParams, showDebug, focusedDoor]);
 
-  const handleDoorClick = (num: number, position: 'left' | 'right' | 'far', event: React.MouseEvent) => {
+  const handleDoorClick = (num: number, position: 'left' | 'right' | 'far' | 'near', event: React.MouseEvent) => {
     event.stopPropagation();
     
     // Disambiguate click from drag
@@ -120,11 +147,16 @@ export const Corridor: React.FC = () => {
 
       setDoorState('opened');
       setTimeout(() => {
-        incrementInstance();
+        if (position === 'near') {
+          decrementInstance();
+        } else {
+          incrementInstance();
+        }
         setFocus(null);
         setDoorState('corridor');
         setZoom(0);
         setPanX(0);
+        setRotationY(0);
       }, 1000);
     } else {
       // First click: Focus
@@ -133,14 +165,21 @@ export const Corridor: React.FC = () => {
       
       // Adjust view so the door is front-center
       if (position === 'left') {
-        setPanX(400);
+        setPanX(200);
         setZoom(800);
+        setRotationY(-90);
       } else if (position === 'right') {
-        setPanX(-400);
+        setPanX(-200);
         setZoom(800);
+        setRotationY(90);
       } else if (position === 'far') {
         setPanX(0);
         setZoom(1200);
+        setRotationY(0);
+      } else if (position === 'near') {
+        setPanX(0);
+        setZoom(-200);
+        setRotationY(180);
       }
     }
   };
@@ -152,14 +191,16 @@ export const Corridor: React.FC = () => {
     }
   };
 
-  const renderDoor = (num: number, position: 'left' | 'right' | 'far', index: number = 0) => {
+  const renderDoor = (num: number, position: 'left' | 'right' | 'far' | 'near', index: number = 0) => {
     const isFocused = focusedDoor === num;
     const isOpened = isFocused && doorState === 'opened';
     const isLocked = position === 'far' ? !isFarDoorUnlocked : false;
     const isUnlocked = position === 'far' ? isFarDoorUnlocked : false;
 
-    const frameStyle = position !== 'far' ? { 
+    const frameStyle = (position === 'left' || position === 'right') ? { 
       transform: `${position === 'left' ? 'translateX(calc(-1 * var(--side-offset, 300px)))' : 'translateX(var(--side-offset, 300px))'} translate3d(0, 0, ${-index * doorSpacing - 100}px) rotateY(${position === 'left' ? '90deg' : '-90deg'})` 
+    } : position === 'near' ? {
+      transform: 'rotateY(180deg) translateZ(1px)' // Prevent z-fighting
     } : {};
 
     return (
@@ -170,13 +211,13 @@ export const Corridor: React.FC = () => {
       >
         <div className="relative">
           {isFocused && doorState === 'focused' && (
-            <div className="prompt-overlay">{position === 'far' ? 'CLICK TO SYNC LATTICE' : 'CLICK TO ENTER'}</div>
+            <div className="prompt-overlay">{position === 'far' ? 'CLICK TO SYNC LATTICE' : position === 'near' ? 'CLICK TO RETURN' : 'CLICK TO ENTER'}</div>
           )}
           <div className="door-label">
-            {position === 'far' ? (isFarDoorUnlocked ? 'LATTICE PORTAL' : 'CORE LOCKED') : `SECTOR ${num}`}
+            {position === 'far' ? (isFarDoorUnlocked ? 'LATTICE PORTAL' : 'CORE LOCKED') : position === 'near' ? 'RETURN PORTAL' : `SECTOR ${num}`}
           </div>
           <Door 
-            number={num} 
+            number={num === -1 ? 0 : num} 
             position={position} 
             onClick={(e) => handleDoorClick(num, position, e)} 
             isFocused={isFocused}
@@ -190,7 +231,7 @@ export const Corridor: React.FC = () => {
   };
 
   // Calculate container transform based on focus
-  let corridorTransform = `translateZ(${zoom}px) translateX(${panX}px)`;
+  let corridorTransform = `rotateY(${rotationY}deg) translateZ(${zoom}px) translateX(${panX}px)`;
   if (focusedDoor !== null && doorState !== 'corridor') {
     // Optional focus positioning
   }
@@ -209,6 +250,40 @@ export const Corridor: React.FC = () => {
       onTouchEnd={handleTouchEnd}
       onClick={handleBackdropClick}
     >
+      {/* Dashboard Overlay */}
+      <div className="fixed bottom-0 left-0 w-full z-50 pointer-events-none">
+        <div className="max-w-xl mx-auto px-6 pb-8">
+          <div className="bg-white/80 backdrop-blur-md border border-zinc-200/50 rounded-2xl shadow-2xl p-4 flex items-center justify-between pointer-events-auto">
+            {/* Location Info */}
+            <div className="flex flex-col">
+              <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1">
+                Lattice Coordinates
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="font-mono text-lg font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100/50">
+                  {currentCell}
+                </div>
+                <div className="h-4 w-[1px] bg-zinc-200" />
+                <div className="text-xs font-medium text-zinc-500 uppercase tracking-tighter">
+                  Instance <span className="text-zinc-900">{String(instanceCount).padStart(3, '0')}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={(e) => { e.stopPropagation(); handleReset(); }}
+                className="bg-zinc-900 text-white hover:bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold tracking-widest uppercase transition-all flex items-center gap-2 group"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:bg-white animate-pulse" />
+                Recenter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Debug Overlay */}
       {showDebug && (
         <div className="debug-overlay">
@@ -246,7 +321,11 @@ export const Corridor: React.FC = () => {
         {rightDoors.map((num, index) => renderDoor(num, 'right', index))}
 
         {/* Near Wall */}
-        <div className="wall wall-near" />
+        <div className="wall wall-near">
+          <div className="door-frame near-frame">
+             {instanceCount > 0 && renderDoor(-1, 'near')}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ interface CorridorState {
   focusedDoor: number | null;
   doorState: 'corridor' | 'focused' | 'opened';
   incrementInstance: () => void;
+  decrementInstance: () => void;
   resetCorridor: () => void;
   setFocus: (door: number | null) => void;
   setDoorState: (state: 'corridor' | 'focused' | 'opened') => void;
@@ -21,6 +22,15 @@ export const useCorridorStore = create<CorridorState>((set) => ({
 
   incrementInstance: () => set((state) => {
     const nextCount = state.instanceCount + 1;
+    return {
+      instanceCount: nextCount,
+      currentCell: String(nextCount).padStart(3, '0'),
+      isFarDoorUnlocked: nextCount >= 3,
+    };
+  }),
+
+  decrementInstance: () => set((state) => {
+    const nextCount = Math.max(0, state.instanceCount - 1);
     return {
       instanceCount: nextCount,
       currentCell: String(nextCount).padStart(3, '0'),
