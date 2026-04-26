@@ -53,6 +53,13 @@ export const isFarDoor = (col: number): boolean => {
 };
 
 /**
+ * Returns true if the column represents the Entrance Door
+ */
+export const isEntranceDoor = (col: number): boolean => {
+  return col === -1;
+};
+
+/**
  * Parses a string position like "r2_c5" into a Position object
  */
 export const parsePosition = (posStr: string): Position => {

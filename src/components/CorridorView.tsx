@@ -128,7 +128,7 @@ export const CorridorView: React.FC = () => {
                       }`}
                       style={{
                         left: `${r * 200}px`,
-                        top: `${c * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL}px`
+                        top: `${(c * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) + 400}px`
                       }}
                       onClick={() => handleTileClick(r, c)}
                     >
@@ -158,7 +158,7 @@ export const CorridorView: React.FC = () => {
               <div 
                 key={`l-door-${i}`}
                 className={`door-container ${currentPosition.col === i && currentPosition.row === 1 ? 'border-blue-500 shadow-lg' : 'opacity-40'}`}
-                style={{ left: `${i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL + 100}px`, top: '130px' }}
+                style={{ left: `${(i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) + 500}px`, top: '130px' }}
               >
                 <div className="door-handle" />
                 <div className="absolute top-4 left-4 text-[8px] font-black text-zinc-400 uppercase tracking-widest">
@@ -174,7 +174,7 @@ export const CorridorView: React.FC = () => {
               <div 
                 key={`r-door-${i}`}
                 className={`door-container ${currentPosition.col === i && currentPosition.row === 3 ? 'border-blue-500 shadow-lg' : 'opacity-40'}`}
-                style={{ left: `${i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL + 100}px`, top: '130px' }}
+                style={{ left: `${(i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) + 500}px`, top: '130px' }}
               >
                 <div className="door-handle" style={{ left: '18px', right: 'auto' }} />
                 <div className="absolute top-4 left-4 text-[8px] font-black text-zinc-400 uppercase tracking-widest">
@@ -206,9 +206,12 @@ export const CorridorView: React.FC = () => {
                 <div className={`w-4 h-4 rounded-full absolute top-8 left-1/2 -translate-x-1/2 transition-colors duration-500 ${isFarDoorUnlocked ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)]' : 'bg-red-500'}`} />
                 <div className="door-handle" />
                 <div className="text-center">
-                  <div className="text-[10px] font-black text-blue-500/80 uppercase tracking-[0.3em] mb-1">Exit Link</div>
-                  <div className="text-5xl font-black text-zinc-900 font-mono tracking-tighter">
-                    {isFarDoorUnlocked ? 'ACTV' : 'LOCK'}
+                  <div className="text-[10px] font-black text-blue-500/80 uppercase tracking-[0.3em] mb-1">Status</div>
+                  <div className="text-5xl font-black text-zinc-900 font-mono tracking-tighter uppercase">
+                    EXIT
+                  </div>
+                  <div className="text-[10px] font-bold text-zinc-400 uppercase mt-2">
+                    {isFarDoorUnlocked ? 'ACCESS GRANTED' : 'LOCKED'}
                   </div>
                 </div>
               </div>
@@ -224,13 +227,28 @@ export const CorridorView: React.FC = () => {
             style={{
               width: '1000px',
               height: '600px',
-              transform: `translateZ(0px) rotateY(180deg)`,
+              transform: `translateZ(400px) rotateY(180deg)`,
               left: '0',
-              top: '-50px'
+              top: '-50px',
+              backfaceVisibility: 'visible'
             }}
           >
-            <div className="text-[20px] font-black text-zinc-300 uppercase tracking-[0.5em]">TARDIS INGRESS</div>
-            <div className="w-64 h-1 bg-zinc-200 mt-4" />
+            <div className="flex flex-col items-center">
+              <div 
+                className="door-container relative border-zinc-300 shadow-sm"
+                style={{ width: '180px', height: '320px' }}
+              >
+                <div className="w-4 h-4 rounded-full absolute top-8 left-1/2 -translate-x-1/2 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]" />
+                <div className="door-handle" />
+                <div className="text-center">
+                  <div className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-1">Origin</div>
+                  <div className="text-4xl font-black text-zinc-900 font-mono tracking-tighter uppercase">
+                    ENTRANCE
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-0 w-full h-1 bg-gradient-to-t from-black/5 to-transparent" />
           </div>
         </motion.div>
       </div>

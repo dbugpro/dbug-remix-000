@@ -2,7 +2,7 @@ export const GRID_CONFIG = {
   ROWS: 5,
   COLS: 11,
   CODE_LENGTH: 3,
-  START_POS: { row: 2, col: 5 }, // Center of the corridor
+  START_POS: { row: 2, col: 3 }, // Adjusted starting position
   
   // Door mappings (Column Index => Digit)
   DOOR_MAP: {

@@ -99,7 +99,8 @@ export const useCorridorStore = create<CorridorState>((set) => ({
         currentCode: '',
         isFarDoorUnlocked: false,
         showMenu: false,
-        rotationY: 0
+        rotationY: 0,
+        zoomLevel: 1
       };
     });
   },
