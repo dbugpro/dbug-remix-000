@@ -17,8 +17,8 @@ export const Dashboard: React.FC = () => {
   const slots = [0, 1, 2].map(i => currentCode[i] || null);
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-inner !bg-slate-950 !border-t-2 !border-blue-500 shadow-2xl">
+    <div className="fixed bottom-0 left-0 right-0 z-[1000] p-1 md:p-3 pb-safe-bottom bg-gradient-to-t from-black/60 to-transparent">
+      <div className="max-w-4xl mx-auto flex items-stretch gap-1 md:gap-3 bg-slate-950 border-t-2 border-blue-500 shadow-2xl p-2 md:p-3 rounded-t-lg md:rounded-xl">
         
         {/* Left Section: Identity & Lattice */}
         <div className="flex flex-col flex-1 border-r border-white/5 pr-4">
@@ -62,7 +62,7 @@ export const Dashboard: React.FC = () => {
           <div className="flex flex-col gap-1 items-end mr-4">
             <div className="text-[9px] font-black text-white/90 uppercase tracking-tighter flex items-center gap-1">
               <LayoutGrid size={10} className="text-zinc-600" />
-              V.1002{debugMode ? ' [DBG]' : ''}
+              V.1005{debugMode ? ' [DBG]' : ''}
             </div>
             <div className="text-[6px] text-zinc-600 font-mono uppercase relative overflow-hidden group">
               <span className="relative z-10">COORD: {currentPosition.row}:{currentPosition.col}</span>

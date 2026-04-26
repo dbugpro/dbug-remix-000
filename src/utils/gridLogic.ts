@@ -6,9 +6,23 @@ export interface Position {
 }
 
 /**
- * Validates if a move is adjacent (Manhattan distance = 1)
+ * Returns true if a tile is part of the navigable path (39 tiles total)
+ * Rows 1, 2, and 3 are full corridors (33)
+ * Rows 0 and 4 have connectors at 0, 5, and 10 (6)
+ */
+export const isPathTile = (row: number, col: number): boolean => {
+  if (row === 1 || row === 2 || row === 3) return true;
+  if (row === 0 || row === 4) {
+    return col === 0 || col === 5 || col === 10;
+  }
+  return false;
+};
+
+/**
+ * Validates if a move is adjacent and stay on path
  */
 export const isValidMove = (prev: Position, next: Position): boolean => {
+  if (!isPathTile(next.row, next.col)) return false;
   const rowDiff = Math.abs(prev.row - next.row);
   const colDiff = Math.abs(prev.col - next.col);
   return (rowDiff + colDiff) === 1;
@@ -56,5 +70,5 @@ export const parsePosition = (posStr: string): Position => {
 export const calculateDepth = (col: number): number => {
   // Each column is 400px deep. 
   // We want the current column to be at a viewing distance.
-  return (col * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) - 50;
+  return (col * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) - 300;
 };

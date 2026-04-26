@@ -11,12 +11,14 @@ interface CorridorState {
   latticeInstance: number;
   debugMode: boolean;
   showMenu: boolean;
+  rotation: { x: number; y: number };
 
   // Actions
   moveTo: (row: number, col: number) => void;
   resetCode: () => void;
   progressToNextInstance: () => void;
   setShowMenu: (show: boolean) => void;
+  setRotation: (rot: { x: number; y: number }) => void;
   loadFromURL: () => void;
 }
 
@@ -54,6 +56,7 @@ export const useCorridorStore = create<CorridorState>((set) => ({
   latticeInstance: 0,
   debugMode: false,
   showMenu: false,
+  rotation: { x: 0, y: 0 },
 
   moveTo: (row, col) => {
     set((state) => {
@@ -92,7 +95,8 @@ export const useCorridorStore = create<CorridorState>((set) => ({
         currentPosition: startPos,
         currentCode: '',
         isFarDoorUnlocked: false,
-        showMenu: false
+        showMenu: false,
+        rotation: { x: 0, y: 0 }
       };
     });
   },
@@ -115,6 +119,10 @@ export const useCorridorStore = create<CorridorState>((set) => ({
 
   setShowMenu: (show: boolean) => {
     set({ showMenu: show });
+  },
+
+  setRotation: (rot) => {
+    set({ rotation: rot });
   },
 
   loadFromURL: () => {
