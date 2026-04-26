@@ -1,0 +1,149 @@
+.corridor-root {
+  --wall-color: #ffffff;
+  --floor-color: #f0f0f0;
+  --ceiling-color: #ffffff;
+  --accent-color: #3b82f6;
+  
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.corridor-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.wall {
+  position: absolute;
+  background-color: var(--wall-color);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Floor with Tiles */
+.wall-floor {
+  width: 1000px;
+  height: 4000px;
+  transform: rotateX(90deg) translateZ(-250px) translateY(-2000px);
+  background: var(--floor-color);
+  background-image: 
+    repeating-linear-gradient(rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 100px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 200px);
+  left: calc(50% - 500px);
+}
+
+.tile {
+  width: 200px;
+  height: 100px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.tile:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Ceiling */
+.wall-ceiling {
+  width: 1000px;
+  height: 4000px;
+  transform: rotateX(-90deg) translateZ(-250px) translateY(2000px);
+  background: var(--ceiling-color);
+  border: none;
+  left: calc(50% - 500px);
+  background-image: 
+    linear-gradient(90deg, transparent 15%, #fff 15%, #fff 18%, transparent 18%, transparent 82%, #fff 82%, #fff 85%, transparent 85%);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.05);
+}
+
+.wall-left {
+  width: 4000px;
+  height: 500px;
+  transform: rotateY(90deg) translateZ(-500px);
+  transform-origin: left;
+  left: calc(50% - 500px);
+}
+
+.wall-right {
+  width: 4000px;
+  height: 500px;
+  transform: rotateY(-90deg) translateZ(-500px);
+  transform-origin: right;
+  left: calc(50% + 500px);
+}
+
+/* Doors */
+.door-container {
+  position: absolute;
+  width: 160px;
+  height: 320px;
+  background: white;
+  border: 1px solid #ddd;
+  box-shadow: 2px 2px 15px rgba(0,0,0,0.03);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.door-container:hover {
+  border-color: var(--accent-color);
+  transform: translateZ(10px);
+}
+
+.door-handle {
+  width: 16px;
+  height: 16px;
+  background: #111;
+  border-radius: 50%;
+  position: absolute;
+  right: 20px;
+  top: 55%;
+}
+
+/* Dashboard / HUD */
+.hud-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 140px;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+.hud-device {
+  pointer-events: auto;
+  background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-left: 1px solid rgba(255,255,255,0.1);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  border-radius: 40px 40px 0 0;
+  width: 90%;
+  max-width: 700px;
+  height: 100%;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -10px 50px rgba(0,0,0,0.9);
+  color: #fff;
+}
+
+@media (orientation: portrait) {
+  .hud-container {
+     height: 100px;
+  }
+}
