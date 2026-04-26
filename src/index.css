@@ -6,13 +6,16 @@
   background-color: #000;
   color: #fff;
   overflow: hidden;
+  height: -webkit-fill-available;
 }
 
 body {
   margin: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   user-select: none;
+  overflow: hidden;
 }
 
 #root {
