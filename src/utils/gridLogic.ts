@@ -39,8 +39,22 @@ export const isFarDoor = (col: number): boolean => {
 };
 
 /**
+ * Parses a string position like "r2_c5" into a Position object
+ */
+export const parsePosition = (posStr: string): Position => {
+  const match = posStr.match(/r(\d+)_c(\d+)/);
+  if (match) {
+    return { row: parseInt(match[1]), col: parseInt(match[2]) };
+  }
+  return GRID_CONFIG.START_POS;
+};
+
+/**
  * Translates grid coordinates to 3D Z-depth
+ * We add an offset so the camera isn't exactly touching the floor tile
  */
 export const calculateDepth = (col: number): number => {
-  return -col * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL;
+  // Each column is 400px deep. 
+  // We want the current column to be at a viewing distance.
+  return (col * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL) - 50;
 };

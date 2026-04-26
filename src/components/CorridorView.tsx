@@ -23,8 +23,10 @@ export const CorridorView: React.FC = () => {
   }, [loadFromURL]);
 
   const handleTileClick = (r: number, c: number) => {
+    const targetPos = { row: r, col: c };
+
     // If it's a far door and we are unlocked, progress
-    if (isFarDoor(c) && isFarDoorUnlocked) {
+    if (isFarDoor(c) && isFarDoorUnlocked && isValidMove(currentPosition, targetPos)) {
       setFading(true);
       setTimeout(() => {
         progressToNextInstance();
@@ -34,16 +36,18 @@ export const CorridorView: React.FC = () => {
     }
 
     // Attempt standard move
-    moveTo(r, c);
-    // Visual feedback for door portal activation
-    if (getDoorDigitForTile(r, c)) {
-      setFading(true);
-      setTimeout(() => setFading(false), 300);
+    if (isValidMove(currentPosition, targetPos)) {
+      moveTo(r, c);
+      // Visual feedback for door portal activation
+      if (getDoorDigitForTile(r, c)) {
+        setFading(true);
+        setTimeout(() => setFading(false), 300);
+      }
     }
   };
 
   const camZ = calculateDepth(currentPosition.col);
-  const camX = -(currentPosition.row - 2) * 200; // Shift camera based on row
+  const camX = -(currentPosition.row - 2) * 200; // Center offset
 
   return (
     <div className="corridor-root">
@@ -61,9 +65,9 @@ export const CorridorView: React.FC = () => {
       <div className="corridor-stage">
         <motion.div
           animate={{
-            transform: `translateZ(${camZ}px) translateX(${camX}px) translateY(-250px)`
+            transform: `translateZ(${camZ}px) translateX(${camX}px) translateY(0px)`
           }}
-          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
           className="w-full h-full preserve-3d"
         >
           {/* Floor Grid (5x11) */}
@@ -101,7 +105,13 @@ export const CorridorView: React.FC = () => {
             </div>
           </div>
 
-          <div className="wall wall-ceiling" />
+          <div className="wall wall-ceiling">
+            <div className="w-full h-full flex justify-around p-4 opacity-50">
+              <div className="w-2 h-full bg-blue-400 blur-[2px] shadow-[0_0_15px_#3b82f6]" />
+              <div className="w-2 h-full bg-blue-400 blur-[2px] shadow-[0_0_15px_#3b82f6]" />
+              <div className="w-2 h-full bg-blue-400 blur-[2px] shadow-[0_0_15px_#3b82f6]" />
+            </div>
+          </div>
 
           {/* Left Wall Doors (Even Columns) */}
           <div className="wall wall-left">

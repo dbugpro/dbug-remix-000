@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Position, isValidMove, getDoorDigitForTile, isFarDoor } from '../utils/gridLogic';
+import { Position, isValidMove, getDoorDigitForTile, isFarDoor, parsePosition } from '../utils/gridLogic';
 import { GRID_CONFIG } from '../config';
 
 // Define the shape of the state
@@ -83,11 +83,16 @@ export const useCorridorStore = create<CorridorState>((set) => ({
 
   resetCode: () => {
     set((state) => {
-      updateURL(GRID_CONFIG.START_POS, '', state.latticeInstance, state.debugMode);
+      const startPos = typeof GRID_CONFIG.START_POS === 'string' 
+        ? parsePosition(GRID_CONFIG.START_POS) 
+        : GRID_CONFIG.START_POS;
+        
+      updateURL(startPos, '', state.latticeInstance, state.debugMode);
       return {
-        currentPosition: GRID_CONFIG.START_POS,
+        currentPosition: startPos,
         currentCode: '',
         isFarDoorUnlocked: false,
+        showMenu: false
       };
     });
   },

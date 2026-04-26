@@ -62,7 +62,7 @@ export const Dashboard: React.FC = () => {
           <div className="flex flex-col gap-1 items-end mr-4">
             <div className="text-[9px] font-black text-white/90 uppercase tracking-tighter flex items-center gap-1">
               <LayoutGrid size={10} className="text-zinc-600" />
-              V.1000{debugMode ? ' [DBG]' : ''}
+              V.1002{debugMode ? ' [DBG]' : ''}
             </div>
             <div className="text-[6px] text-zinc-600 font-mono uppercase relative overflow-hidden group">
               <span className="relative z-10">COORD: {currentPosition.row}:{currentPosition.col}</span>
@@ -70,7 +70,11 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <button className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors flex items-center gap-1" title="Display">
+            <button 
+              onClick={() => setShowMenu(false)}
+              className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors flex items-center gap-1" 
+              title="Display"
+            >
               <Monitor size={14} />
             </button>
             <button 
