@@ -121,10 +121,10 @@ export const CorridorView: React.FC = () => {
                     <div
                       key={`tile-${r}-${c}`}
                       className={`absolute tile transition-all duration-300 flex items-center justify-center ${
-                        isCurrent ? 'bg-blue-500/20 border-blue-500/50' : 
-                        isAdjacent ? 'hover:bg-blue-500/10 cursor-pointer border border-white/5' : 
-                        !isPath ? 'opacity-5 grayscale pointer-events-none' :
-                        'opacity-20 pointer-events-none'
+                        isCurrent ? 'bg-blue-500/40 border-blue-500' : 
+                        isAdjacent ? 'hover:bg-blue-500/20 cursor-pointer border border-white/20' : 
+                        !isPath ? 'opacity-10 grayscale pointer-events-none' :
+                        'opacity-40 pointer-events-none'
                       }`}
                       style={{
                         left: `${r * 200}px`,
@@ -192,7 +192,8 @@ export const CorridorView: React.FC = () => {
               height: '600px',
               transform: `translateZ(-4400px)`,
               left: '0',
-              top: '-50px'
+              top: '-50px',
+              backfaceVisibility: 'visible'
             }}
           >
             {/* Centered door unit */}
@@ -215,6 +216,21 @@ export const CorridorView: React.FC = () => {
 
             {/* Visual grounding */}
             <div className="absolute bottom-0 w-full h-1 bg-gradient-to-t from-black/10 to-transparent" />
+          </div>
+
+          {/* Near Wall (Behind the user at start) */}
+          <div 
+            className="absolute bg-zinc-100 border-x border-zinc-300 flex flex-col items-center justify-center overflow-hidden"
+            style={{
+              width: '1000px',
+              height: '600px',
+              transform: `translateZ(0px) rotateY(180deg)`,
+              left: '0',
+              top: '-50px'
+            }}
+          >
+            <div className="text-[20px] font-black text-zinc-300 uppercase tracking-[0.5em]">TARDIS INGRESS</div>
+            <div className="w-64 h-1 bg-zinc-200 mt-4" />
           </div>
         </motion.div>
       </div>
