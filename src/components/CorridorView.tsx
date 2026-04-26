@@ -14,8 +14,8 @@ export const CorridorView: React.FC = () => {
     moveTo, 
     progressToNextInstance, 
     loadFromURL,
-    rotation,
-    setRotation,
+    rotationY,
+    setRotationY,
     zoomLevel,
     setZoom
   } = useCorridorStore();
@@ -35,10 +35,8 @@ export const CorridorView: React.FC = () => {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     
-    setRotation({
-      x: Math.max(-30, Math.min(30, rotation.x - e.movementY * 0.2)),
-      y: rotation.y - e.movementX * 0.2
-    });
+    // Only update Y rotation for horizontal panning
+    setRotationY(rotationY - e.movementX * 0.2);
   };
 
   const handlePointerUp = () => {
@@ -103,8 +101,7 @@ export const CorridorView: React.FC = () => {
             z: camZ,
             x: camX,
             y: 0,
-            rotateY: rotation.y,
-            rotateX: rotation.x,
+            rotateY: rotationY,
             scale: zoomLevel
           }}
           transition={isDragging ? { duration: 0 } : { duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
