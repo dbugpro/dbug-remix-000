@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { Corridor } from './components/Corridor';
+import { CorridorView } from './components/CorridorView';
 
 function App() {
   return (
     <BrowserRouter>
       <div className="w-full h-full">
-        <Corridor />
+        <CorridorView />
       </div>
     </BrowserRouter>
   );

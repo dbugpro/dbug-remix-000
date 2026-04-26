@@ -1,98 +1,138 @@
-.corridor-root {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes scan {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+:root {
   --wall-color: #ffffff;
   --floor-color: #f7f7f7;
   --ceiling-color: #ffffff;
   --accent-color: #3b82f6;
   
+  background-color: #000;
+  color: #fff;
+  overflow: hidden;
+  height: -webkit-fill-available;
+}
+
+body {
+  margin: 0;
   width: 100vw;
   height: 100vh;
   height: 100dvh;
+  user-select: none;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.corridor-root {
+  width: 100vw;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  perspective: 1200px;
+  perspective-origin: center;
   background: #000;
   overflow: hidden;
-  perspective: 1000px;
 }
 
 .corridor-stage {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 1000px;
+  height: 500px;
+  transform-style: preserve-3d;
+}
+
+.preserve-3d {
   transform-style: preserve-3d;
 }
 
 .wall {
   position: absolute;
   background-color: var(--wall-color);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  transform-style: preserve-3d;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   backface-visibility: hidden;
 }
 
 /* Floor */
 .wall-floor {
   width: 1000px;
-  height: 4000px;
-  transform: rotateX(90deg) translateZ(-250px) translateY(-2000px);
-  background: var(--floor-color);
-  background-image: 
-    repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 100px),
-    repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 200px);
-  left: calc(50% - 500px);
+  height: 4400px;
+  top: 500px; /* Base at bottom of assembly */
+  left: 0;
+  transform-origin: top;
+  transform: rotateX(90deg);
+  background: #fbfbfb;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.1);
 }
 
 .tile {
   width: 200px;
-  height: 100px;
+  height: 400px;
   cursor: pointer;
   background: transparent;
-  transition: background 0.2s;
+  border: 1px solid rgba(0,0,0,0.03);
+  transition: all 0.3s ease;
 }
 
 .tile:hover {
-  background: rgba(59, 130, 246, 0.05);
+  background: rgba(59, 130, 246, 0.06);
 }
 
-/* Ceiling */
 .wall-ceiling {
   width: 1000px;
-  height: 4000px;
-  transform: rotateX(-90deg) translateZ(-250px) translateY(2000px);
-  background: var(--ceiling-color);
-  left: calc(50% - 500px);
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.02);
+  height: 4400px;
+  top: 0;
+  left: 0;
+  transform-origin: top;
+  transform: rotateX(90deg);
+  background: #ffffff;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.05);
 }
 
 .wall-left {
-  width: 4000px;
+  width: 4400px;
   height: 500px;
-  transform: rotateY(90deg) translateZ(-500px);
+  top: 0;
+  left: 0;
   transform-origin: left;
-  left: calc(50% - 500px);
+  transform: rotateY(90deg);
+  background: linear-gradient(to right, #f9f9f9, #ffffff);
 }
 
 .wall-right {
-  width: 4000px;
+  width: 4400px;
   height: 500px;
-  transform: rotateY(-90deg) translateZ(-500px);
+  top: 0;
+  right: 0;
   transform-origin: right;
-  left: calc(50% + 500px);
+  transform: rotateY(-90deg);
+  background: linear-gradient(to left, #f9f9f9, #ffffff);
 }
 
 /* Doors */
 .door-container {
   position: absolute;
-  width: 140px;
-  height: 280px;
+  width: 120px;
+  height: 240px;
   background: #fff;
-  border: 1px solid #eee;
+  border: 2px solid #f0f0f0;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
 .door-container:hover {
@@ -112,8 +152,8 @@
   transform: translateY(-50%);
 }
 
-/* Dashboard / HUD - Ultra Thin */
-.hud-container {
+/* Dashboard - Ultra Thin */
+.dashboard-container {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -126,7 +166,7 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.hud-device {
+.dashboard-inner {
   pointer-events: auto;
   background: rgba(10, 10, 10, 0.95);
   backdrop-filter: blur(20px);
@@ -144,10 +184,10 @@
 }
 
 @media (max-width: 600px) {
-  .hud-container {
+  .dashboard-container {
     height: 40px;
   }
-  .hud-device {
+  .dashboard-inner {
     max-width: 90%;
     padding: 0 15px;
   }

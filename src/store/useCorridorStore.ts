@@ -1,19 +1,125 @@
 import { create } from 'zustand';
+import { Position, isValidMove, getDoorDigitForTile, isFarDoor } from '../utils/gridLogic';
+import { GRID_CONFIG } from '../config';
 
+// Define the shape of the state
 interface CorridorState {
-  x: number;
-  z: number;
-  instance: number;
-  setPosition: (x: number, z: number) => void;
-  nextInstance: () => void;
-  reset: () => void;
+  userIdentity: string;
+  currentPosition: Position;
+  currentCode: string;
+  isFarDoorUnlocked: boolean;
+  latticeInstance: number;
+  debugMode: boolean;
+  showMenu: boolean;
+
+  // Actions
+  moveTo: (row: number, col: number) => void;
+  resetCode: () => void;
+  progressToNextInstance: () => void;
+  setShowMenu: (show: boolean) => void;
+  loadFromURL: () => void;
 }
 
+// Helper to sync state with URL
+const updateURL = (pos: Position, code: string, lattice: number, debug: boolean) => {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('pos', `r${pos.row}_c${pos.col}`);
+    url.searchParams.set('code', code);
+    url.searchParams.set('lattice', lattice.toString());
+    if (debug) url.searchParams.set('debug', 'true');
+    window.history.pushState({}, '', url.toString());
+  } catch (e) {
+    console.error('URL sync failed', e);
+  }
+};
+
+const parseURLParams = () => {
+  const params = new URLSearchParams(window.location.search);
+  const posMatch = (params.get('pos') || '').match(/r(\d+)_c(\d+)/);
+  
+  return {
+    pos: posMatch ? { row: parseInt(posMatch[1]), col: parseInt(posMatch[2]) } : GRID_CONFIG.START_POS,
+    code: params.get('code') || '',
+    lattice: parseInt(params.get('lattice') || '0', 10),
+    debug: params.has('debug'),
+  };
+};
+
 export const useCorridorStore = create<CorridorState>((set) => ({
-  x: 0,
-  z: 0,
-  instance: 0,
-  setPosition: (x, z) => set({ x, z }),
-  nextInstance: () => set((state) => ({ x: 0, z: 0, instance: state.instance + 1 })),
-  reset: () => set({ x: 0, z: 0, instance: 0 }),
+  userIdentity: 'dbugx',
+  currentPosition: GRID_CONFIG.START_POS,
+  currentCode: '',
+  isFarDoorUnlocked: false,
+  latticeInstance: 0,
+  debugMode: false,
+  showMenu: false,
+
+  moveTo: (row, col) => {
+    set((state) => {
+      const targetPos = { row, col };
+      
+      // Enforce proximity
+      if (!isValidMove(state.currentPosition, targetPos)) return state;
+
+      let nextCode = state.currentCode;
+      const doorDigit = getDoorDigitForTile(row, col);
+
+      // Accumulate code if threshold reached
+      if (doorDigit && nextCode.length < GRID_CONFIG.CODE_LENGTH) {
+        nextCode += doorDigit;
+      }
+
+      const unlocked = nextCode.length === GRID_CONFIG.CODE_LENGTH;
+      updateURL(targetPos, nextCode, state.latticeInstance, state.debugMode);
+
+      return {
+        currentPosition: targetPos,
+        currentCode: nextCode,
+        isFarDoorUnlocked: unlocked
+      };
+    });
+  },
+
+  resetCode: () => {
+    set((state) => {
+      updateURL(GRID_CONFIG.START_POS, '', state.latticeInstance, state.debugMode);
+      return {
+        currentPosition: GRID_CONFIG.START_POS,
+        currentCode: '',
+        isFarDoorUnlocked: false,
+      };
+    });
+  },
+
+  progressToNextInstance: () => {
+    set((state) => {
+      if (!state.isFarDoorUnlocked || !isFarDoor(state.currentPosition.col)) return state;
+
+      const nextLattice = state.latticeInstance + 1;
+      updateURL(GRID_CONFIG.START_POS, '', nextLattice, state.debugMode);
+
+      return {
+        currentPosition: GRID_CONFIG.START_POS,
+        currentCode: '',
+        isFarDoorUnlocked: false,
+        latticeInstance: nextLattice,
+      };
+    });
+  },
+
+  setShowMenu: (show: boolean) => {
+    set({ showMenu: show });
+  },
+
+  loadFromURL: () => {
+    const { pos, code, lattice, debug } = parseURLParams();
+    set({
+      currentPosition: pos,
+      currentCode: code,
+      isFarDoorUnlocked: code.length === GRID_CONFIG.CODE_LENGTH,
+      latticeInstance: lattice,
+      debugMode: debug,
+    });
+  },
 }));
