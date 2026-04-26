@@ -11,36 +11,38 @@ export const HUD: React.FC<HUDProps> = ({ state, onReset }) => {
   return (
     <div className="hud-container">
       <div className="hud-device">
-        {/* Lattice Status */}
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">
-            <MapPin size={10} className="text-zinc-600" />
-            Lattice Index
+        {/* Left Section: Lattice Index */}
+        <div className="flex flex-col flex-1">
+          <div className="flex items-center gap-1.5 text-[8px] font-bold text-zinc-500 uppercase tracking-widest leading-none mb-1">
+            <MapPin size={8} />
+            Pos
           </div>
-          <div className="font-mono text-2xl font-black tracking-tighter text-white">
-            {state.x.toString().padStart(2, '0')}.{state.z.toString().padStart(3, '0')}
-          </div>
-        </div>
-
-        {/* Level Monitor */}
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-1.5 bg-blue-500/10 border border-blue-500/20 px-3 py-0.5 rounded-full">
-            <Radio size={10} className="text-blue-500 animate-pulse" />
-            <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Linked</span>
-          </div>
-          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-            Level <span className="text-white font-mono">{String(state.instance).padStart(3, '0')}</span>
+          <div className="font-mono text-lg font-black tracking-tighter text-white leading-none">
+            {state.x}:{state.z}
           </div>
         </div>
 
-        {/* Global Reset */}
-        <button 
-          onClick={onReset}
-          className="flex items-center gap-2 bg-white/5 hover:bg-white/10 active:scale-95 transition-all px-4 py-2.5 rounded-2xl border border-white/10 group"
-        >
-          <RefreshCw size={16} className="text-zinc-300 group-hover:rotate-180 transition-transform duration-500" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-100">Origin</span>
-        </button>
+        {/* Center Section: Origin Button */}
+        <div className="flex flex-1 justify-center">
+          <button 
+            onClick={onReset}
+            className="flex items-center justify-center bg-white/5 hover:bg-white/10 active:scale-90 transition-all w-10 h-10 rounded-full border border-white/10 shadow-lg shadow-black/50"
+            title="Return to Origin"
+          >
+            <RefreshCw size={18} className="text-zinc-100" />
+          </button>
+        </div>
+
+        {/* Right Section: Level Monitor */}
+        <div className="flex flex-col flex-1 items-end">
+          <div className="flex items-center gap-1 mb-1">
+            <Radio size={8} className="text-blue-500 animate-pulse" />
+            <span className="text-[8px] font-black text-blue-400 uppercase tracking-widest">Linked</span>
+          </div>
+          <div className="text-[9px] font-bold text-zinc-400 leading-none">
+            LVL <span className="text-white font-mono">{String(state.instance).padStart(3, '0')}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
