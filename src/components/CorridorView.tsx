@@ -15,7 +15,9 @@ export const CorridorView: React.FC = () => {
     progressToNextInstance, 
     loadFromURL,
     rotation,
-    setRotation
+    setRotation,
+    zoomLevel,
+    setZoom
   } = useCorridorStore();
   
   const [fading, setFading] = useState(false);
@@ -41,6 +43,12 @@ export const CorridorView: React.FC = () => {
 
   const handlePointerUp = () => {
     setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    // Zoom sensitivity: positive delta is scrolling down (zoom out), negative is scrolling up (zoom in)
+    const zoomDelta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(zoomDelta);
   };
 
   const handleTileClick = (r: number, c: number) => {
@@ -76,6 +84,7 @@ export const CorridorView: React.FC = () => {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
+      onWheel={handleWheel}
     >
       <AnimatePresence>
         {fading && (
@@ -95,7 +104,8 @@ export const CorridorView: React.FC = () => {
             x: camX,
             y: 0,
             rotateY: rotation.y,
-            rotateX: rotation.x
+            rotateX: rotation.x,
+            scale: zoomLevel
           }}
           transition={isDragging ? { duration: 0 } : { duration: 1.0, ease: [0.4, 0, 0.2, 1] }}
           className="w-full h-full preserve-3d"
@@ -167,10 +177,10 @@ export const CorridorView: React.FC = () => {
               <div 
                 key={`r-door-${i}`}
                 className={`door-container ${currentPosition.col === i && currentPosition.row === 3 ? 'border-blue-500 shadow-lg' : 'opacity-40'}`}
-                style={{ left: `${i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL + 100}px`, top: '130px', transform: 'scaleX(-1)' }}
+                style={{ left: `${i * GRID_CONFIG.CORRIDOR_DEPTH_PER_COL + 100}px`, top: '130px' }}
               >
-                <div className="door-handle" />
-                <div className="absolute top-4 left-4 text-[8px] font-black text-zinc-400 uppercase tracking-widest transform scaleX(-1)">
+                <div className="door-handle" style={{ left: '18px', right: 'auto' }} />
+                <div className="absolute top-4 left-4 text-[8px] font-black text-zinc-400 uppercase tracking-widest">
                   PORTAL {i}
                 </div>
               </div>

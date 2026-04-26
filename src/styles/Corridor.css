@@ -61,8 +61,8 @@ body {
 .wall {
   position: absolute;
   background-color: var(--wall-color);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  backface-visibility: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  backface-visibility: visible;
 }
 
 /* Floor */
@@ -74,10 +74,10 @@ body {
   transform-origin: top;
   transform: rotateX(90deg);
   background: #ffffff;
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.2);
   background-image: 
-    linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px);
   background-size: 200px 400px;
 }
 
@@ -113,8 +113,8 @@ body {
   left: 0;
   transform-origin: left;
   transform: rotateY(90deg);
-  background: linear-gradient(to right, #f0f0f0, #ffffff);
-  border-right: 2px solid rgba(0,0,0,0.15);
+  background: linear-gradient(to right, #dfdfdf, #ffffff);
+  border-right: 2px solid rgba(0,0,0,0.2);
 }
 
 .wall-right {
@@ -124,8 +124,8 @@ body {
   right: 0;
   transform-origin: right;
   transform: rotateY(-90deg);
-  background: linear-gradient(to left, #f0f0f0, #ffffff);
-  border-left: 2px solid rgba(0,0,0,0.15);
+  background: linear-gradient(to left, #dfdfdf, #ffffff);
+  border-left: 2px solid rgba(0,0,0,0.2);
 }
 
 /* Doors */

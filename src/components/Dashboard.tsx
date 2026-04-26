@@ -11,6 +11,7 @@ export const Dashboard: React.FC = () => {
     isFarDoorUnlocked,
     resetCode, 
     setShowMenu,
+    showMenu,
     debugMode 
   } = useCorridorStore();
   
@@ -72,20 +73,23 @@ export const Dashboard: React.FC = () => {
           <div className="flex gap-2">
             <button 
               onClick={() => setShowMenu(false)}
-              className="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors flex items-center gap-1" 
+              className={`p-2 rounded transition-colors flex items-center gap-1 ${!showMenu ? 'bg-blue-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}`} 
               title="Display"
             >
               <Monitor size={14} />
             </button>
             <button 
               onClick={() => setShowMenu(true)}
-              className="p-2 bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors flex items-center gap-1" 
+              className={`p-2 rounded transition-colors flex items-center gap-1 ${showMenu ? 'bg-blue-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}`} 
               title="Menu"
             >
               <Menu size={14} />
             </button>
             <button 
-              onClick={resetCode}
+              onClick={() => {
+                resetCode();
+                setShowMenu(false);
+              }}
               className="p-2 bg-red-600 hover:bg-red-500 text-white rounded transition-colors flex items-center gap-1" 
               title="Home"
             >

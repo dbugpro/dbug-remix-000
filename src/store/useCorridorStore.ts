@@ -12,6 +12,7 @@ interface CorridorState {
   debugMode: boolean;
   showMenu: boolean;
   rotation: { x: number; y: number };
+  zoomLevel: number;
 
   // Actions
   moveTo: (row: number, col: number) => void;
@@ -19,6 +20,7 @@ interface CorridorState {
   progressToNextInstance: () => void;
   setShowMenu: (show: boolean) => void;
   setRotation: (rot: { x: number; y: number }) => void;
+  setZoom: (delta: number) => void;
   loadFromURL: () => void;
 }
 
@@ -57,6 +59,7 @@ export const useCorridorStore = create<CorridorState>((set) => ({
   debugMode: false,
   showMenu: false,
   rotation: { x: 0, y: 0 },
+  zoomLevel: 1,
 
   moveTo: (row, col) => {
     set((state) => {
@@ -123,6 +126,12 @@ export const useCorridorStore = create<CorridorState>((set) => ({
 
   setRotation: (rot) => {
     set({ rotation: rot });
+  },
+
+  setZoom: (delta) => {
+    set((state) => ({
+      zoomLevel: Math.max(0.3, Math.min(2.5, state.zoomLevel + delta))
+    }));
   },
 
   loadFromURL: () => {
